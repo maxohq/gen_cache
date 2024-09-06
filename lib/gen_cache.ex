@@ -21,11 +21,10 @@ defmodule GenCache do
   - the postponed requests get a chance to run again on each state transition
   """
 
+  alias GenCache.Data
   @behaviour :gen_statem
 
   @default_expire_in :timer.seconds(30)
-
-  defstruct busy: %{}, cache: %{}, valid_until: %{}, expire_in: %{}
 
   def start_link(opts \\ []), do: :gen_statem.start_link(__MODULE__, [], opts)
 
@@ -35,7 +34,7 @@ defmodule GenCache do
   @impl true
   def init(_) do
     # state / data / actions
-    {:ok, %{}, %__MODULE__{}, []}
+    {:ok, %{}, %Data{}, []}
   end
 
   ### PUBLIC API ###
@@ -115,19 +114,19 @@ defmodule GenCache do
   end
 
   defp mark_busy_for_request(data, request, from) do
-    %__MODULE__{data | busy: Map.put(data.busy, request, from)}
+    %Data{data | busy: Map.put(data.busy, request, from)}
   end
 
   defp mark_done_for_request(data, request) do
-    %__MODULE__{data | busy: Map.delete(data.busy, request)}
+    %Data{data | busy: Map.delete(data.busy, request)}
   end
 
   defp store_in_cache(data, request, res) do
-    %__MODULE__{data | cache: Map.put(data.cache, request, res)}
+    %Data{data | cache: Map.put(data.cache, request, res)}
   end
 
   defp remove_from_cache(data, request) do
-    %__MODULE__{data | cache: Map.delete(data.cache, request)}
+    %Data{data | cache: Map.delete(data.cache, request)}
   end
 
   defp get_from_cache(data, request) do
@@ -140,26 +139,26 @@ defmodule GenCache do
     end
   end
 
-  def update_valid_until(data, request) do
+  defp update_valid_until(data, request) do
     time = :erlang.monotonic_time()
     expire_in = Map.get(data.expire_in, request, @default_expire_in)
 
-    %__MODULE__{
+    %Data{
       data
       | valid_until: Map.put(data.valid_until, request, time + expire_in * 1_000_000)
     }
   end
 
-  def remove_valid_until(data, request) do
-    %__MODULE__{data | valid_until: Map.delete(data.valid_until, request)}
+  defp remove_valid_until(data, request) do
+    %Data{data | valid_until: Map.delete(data.valid_until, request)}
   end
 
-  def update_expire_in(data, request, expire_in) do
-    %__MODULE__{data | expire_in: Map.put(data.expire_in, request, expire_in)}
+  defp update_expire_in(data, request, expire_in) do
+    %Data{data | expire_in: Map.put(data.expire_in, request, expire_in)}
   end
 
-  def remove_expire_in(data, request) do
-    %__MODULE__{data | expire_in: Map.delete(data.expire_in, request)}
+  defp remove_expire_in(data, request) do
+    %Data{data | expire_in: Map.delete(data.expire_in, request)}
   end
 
   def remove_expired_entries(data, now) do

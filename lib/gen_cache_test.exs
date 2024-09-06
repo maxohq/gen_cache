@@ -57,7 +57,7 @@ defmodule GenCacheTest do
       state = clean_state(pid)
 
       assert state ==
-               %GenCache{
+               %GenCache.Data{
                  busy: %{},
                  cache: %{
                    {GenCacheTest.ReqBackend, :fetch, [1]} => "RESULT: 1",
@@ -80,7 +80,7 @@ defmodule GenCacheTest do
       GenCache.request(pid, req_tuple(2))
       GenCache.remove(pid, req_tuple(1))
 
-      assert clean_state(pid) == %GenCache{
+      assert clean_state(pid) == %GenCache.Data{
                busy: %{},
                expire_in: %{
                  {GenCacheTest.ReqBackend, :fetch, [2]} => 30000
