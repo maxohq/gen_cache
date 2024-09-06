@@ -4,7 +4,9 @@ Generic cache for Elixir. It uses MFA tuples as keys, so you can cache any funct
 
 By relying on `gen_statem`, it is able to prevent duplicate work on concurrent requests on the same key, while keeping the API simple.
 
-The generation for the cache value is done in a separate process, so the GenServer loop is never blocked. Also it is possible to generate multiple diffeent expensive values in parallel, with all the callers waiting for the result. This happens transparently to the caller.
+The generation of the cache value is done in a separate process, so the main GenServer loop is never blocked. Also it is possible to generate multiple different expensive values in parallel, with all the callers waiting for the result. This happens transparently to the caller.
+
+All thanks to the awesome [gen_statem](https://www.erlang.org/doc/apps/stdlib/gen_statem.html) module.
 
 
 ## Usage
