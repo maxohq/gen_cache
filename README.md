@@ -27,6 +27,10 @@ res = MyCache.request({IO, :puts, ["Hello World"]})
 res = MyCache.request({IO, :puts, ["Hello World"]})
 ```
 
+## TODO
+- [ ] configurable default timeout
+- [ ] periodic cleanup of expired entries
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
