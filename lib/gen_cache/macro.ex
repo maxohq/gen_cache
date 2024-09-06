@@ -11,11 +11,11 @@ defmodule GenCache.Macro do
       ```
       {:ok, pid} = #{@mymodule}.start_link()
 
-      # populate cache with default `expire_in` value
+      # populate cache with default `ttl` value
       response = #{@mymodule}.request(pid, {Mod, :fun, [arg1, arg2]})
 
-      # populate cache with custom `expire_in` value
-      response = #{@mymodule}.request(pid, {Mod, :fun, [arg1, arg2]}, expire_in: :timer.seconds(15))
+      # populate cache with custom `ttl` value
+      response = #{@mymodule}.request(pid, {Mod, :fun, [arg1, arg2]}, ttl: :timer.seconds(15))
       ```
 
       Special notes:
@@ -31,7 +31,7 @@ defmodule GenCache.Macro do
       # for some reason dialyzer doesn't like our `start_link` function
       @dialyzer {:nowarn_function, [{:start_link, 1}]}
 
-      @default_expire_in :timer.seconds(30)
+      @default_ttl :timer.seconds(30)
 
       @impl true
       def callback_mode(), do: [:handle_event_function, :state_enter]

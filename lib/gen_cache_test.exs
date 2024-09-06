@@ -64,7 +64,7 @@ defmodule GenCacheTest do
                    {GenCacheTest.ReqBackend, :fetch, [2]} => "RESULT: 2",
                    {GenCacheTest.ReqBackend, :fetch, [3]} => "RESULT: 3"
                  },
-                 expire_in: %{
+                 ttl: %{
                    {GenCacheTest.ReqBackend, :fetch, [1]} => 30000,
                    {GenCacheTest.ReqBackend, :fetch, [2]} => 30000,
                    {GenCacheTest.ReqBackend, :fetch, [3]} => 30000
@@ -82,7 +82,7 @@ defmodule GenCacheTest do
 
       assert clean_state(pid) == %GenCache.Data{
                busy: %{},
-               expire_in: %{
+               ttl: %{
                  {GenCacheTest.ReqBackend, :fetch, [2]} => 30000
                },
                cache: %{{GenCacheTest.ReqBackend, :fetch, [2]} => "RESULT: 2"}
@@ -94,10 +94,10 @@ defmodule GenCacheTest do
     test "works" do
       {:ok, pid} = GenCache.start_link([])
 
-      GenCache.request(pid, req_tuple(1), expire_in: :timer.seconds(5))
-      GenCache.request(pid, req_tuple(2), expire_in: :timer.seconds(10))
-      GenCache.request(pid, req_tuple(3), expire_in: :timer.seconds(15))
-      # default expire_in - 30 seconds
+      GenCache.request(pid, req_tuple(1), ttl: :timer.seconds(5))
+      GenCache.request(pid, req_tuple(2), ttl: :timer.seconds(10))
+      GenCache.request(pid, req_tuple(3), ttl: :timer.seconds(15))
+      # default ttl - 30 seconds
       GenCache.request(pid, req_tuple(4))
 
       now = :erlang.monotonic_time()

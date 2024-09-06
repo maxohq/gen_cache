@@ -7,11 +7,11 @@ defmodule GenCache do
   ```
   {:ok, pid} = GenCache.start_link()
 
-  # populate cache with default `expire_in` value
+  # populate cache with default `ttl` value
   response = GenCache.request(pid, {Mod, :fun, [arg1, arg2]})
 
-  # populate cache with custom `expire_in` value
-  response = GenCache.request(pid, {Mod, :fun, [arg1, arg2]}, expire_in: :timer.seconds(15))
+  # populate cache with custom `ttl` value
+  response = GenCache.request(pid, {Mod, :fun, [arg1, arg2]}, ttl: :timer.seconds(15))
   ```
 
   Special notes:
@@ -24,7 +24,7 @@ defmodule GenCache do
   alias GenCache.Data
   @behaviour :gen_statem
 
-  @default_expire_in :timer.seconds(30)
+  @default_ttl :timer.seconds(30)
 
   def start_link(opts \\ []), do: :gen_statem.start_link(__MODULE__, [], opts)
 
@@ -57,15 +57,15 @@ defmodule GenCache do
     data =
       remove_from_cache(data, request)
       |> remove_valid_until(request)
-      |> remove_expire_in(request)
+      |> remove_ttl(request)
 
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
   #
   def handle_event({:call, from}, {:request, request, req_opts}, _, data) do
-    expire_in = Keyword.get(req_opts, :expire_in, @default_expire_in)
-    data = update_expire_in(data, request, expire_in)
+    ttl = Keyword.get(req_opts, :ttl, @default_ttl)
+    data = update_ttl(data, request, ttl)
     {res, data} = get_from_cache(data, request)
     is_busy = is_busy_for_request(data, request)
 
@@ -141,11 +141,11 @@ defmodule GenCache do
 
   defp update_valid_until(data, request) do
     time = :erlang.monotonic_time()
-    expire_in = Map.get(data.expire_in, request, @default_expire_in)
+    ttl = Map.get(data.ttl, request, @default_ttl)
 
     %Data{
       data
-      | valid_until: Map.put(data.valid_until, request, time + expire_in * 1_000_000)
+      | valid_until: Map.put(data.valid_until, request, time + ttl * 1_000_000)
     }
   end
 
@@ -153,12 +153,12 @@ defmodule GenCache do
     %Data{data | valid_until: Map.delete(data.valid_until, request)}
   end
 
-  defp update_expire_in(data, request, expire_in) do
-    %Data{data | expire_in: Map.put(data.expire_in, request, expire_in)}
+  defp update_ttl(data, request, ttl) do
+    %Data{data | ttl: Map.put(data.ttl, request, ttl)}
   end
 
-  defp remove_expire_in(data, request) do
-    %Data{data | expire_in: Map.delete(data.expire_in, request)}
+  defp remove_ttl(data, request) do
+    %Data{data | ttl: Map.delete(data.ttl, request)}
   end
 
   def remove_expired_entries(data, now) do
@@ -168,7 +168,7 @@ defmodule GenCache do
       acc
       |> remove_from_cache(k)
       |> remove_valid_until(k)
-      |> remove_expire_in(k)
+      |> remove_ttl(k)
     end)
   end
 end
