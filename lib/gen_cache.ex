@@ -21,6 +21,12 @@ defmodule GenCache do
   - the postponed requests get a chance to run again on each state transition
   """
 
+  defmacro __using__(_) do
+    quote do
+      use GenCache.Macro
+    end
+  end
+
   alias GenCache.Data
   @behaviour :gen_statem
 

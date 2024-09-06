@@ -3,7 +3,7 @@ defmodule GenCache.MacroTest do
   doctest GenCache.Macro
 
   defmodule TestCache do
-    use GenCache.Macro
+    use GenCache
   end
 
   test "basics work" do
