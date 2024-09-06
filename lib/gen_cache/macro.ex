@@ -28,20 +28,23 @@ defmodule GenCache.Macro do
       alias GenCache.Data
       @behaviour :gen_statem
 
+      # for some reason dialyzer doesn't like our `start_link` function
+      @dialyzer {:nowarn_function, [{:start_link, 1}]}
+
       @default_expire_in :timer.seconds(30)
 
+      @impl true
+      def callback_mode(), do: [:handle_event_function, :state_enter]
+
       def start_link(opts \\ []) do
-        with {:not_running, nil} <- {:not_running, Process.whereis(__MODULE__)},
+        with {:check, nil} <- {:check, Process.whereis(__MODULE__)},
              {:ok, pid} <- :gen_statem.start_link(__MODULE__, [], opts) do
           Process.register(pid, __MODULE__)
           {:ok, pid}
         else
-          {:not_running, pid} -> {:error, {:already_started, pid}}
+          {:check, pid} -> {:error, {:already_started, pid}}
         end
       end
-
-      @impl true
-      def callback_mode(), do: [:handle_event_function, :state_enter]
 
       @impl true
       def init(_) do
