@@ -5,7 +5,7 @@ defmodule GenCache.MixProject do
     [
       app: :gen_cache,
       version: "0.1.0",
-      elixir: "~> 1.17",
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_paths: ["lib"],
