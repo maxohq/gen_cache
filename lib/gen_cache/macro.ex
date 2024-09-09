@@ -38,7 +38,7 @@ defmodule GenCache.Macro do
 
       def start_link(opts \\ []) do
         with {:check, nil} <- {:check, Process.whereis(__MODULE__)},
-             {:ok, pid} <- :gen_statem.start_link(__MODULE__, [], opts) do
+             {:ok, pid} <- :gen_statem.start_link(__MODULE__, opts, opts) do
           Process.register(pid, __MODULE__)
           {:ok, pid}
         else
@@ -47,9 +47,8 @@ defmodule GenCache.Macro do
       end
 
       @impl true
-      def init(_) do
-        # state / data / actions
-        {:ok, %{}, %Data{}, []}
+      def init(opts) do
+        GenCache.init(opts)
       end
 
       ### PUBLIC API ###

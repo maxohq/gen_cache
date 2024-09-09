@@ -20,6 +20,7 @@ defmodule GenCache do
   - every change on this map triggers a state transition in gen_statem
   - the postponed requests get a chance to run again on each state transition
   """
+  require Logger
 
   defmacro __using__(_) do
     quote do
@@ -31,16 +32,34 @@ defmodule GenCache do
   @behaviour :gen_statem
 
   @default_ttl :timer.seconds(30)
+  @purge_loop :timer.seconds(5)
+  @permitted_opts [:purge_loop, :ttl]
 
-  def start_link(opts \\ []), do: :gen_statem.start_link(__MODULE__, [], opts)
+  def start_link(opts \\ []) do
+    filtered_opts = Keyword.take(opts, @permitted_opts)
+    :gen_statem.start_link(__MODULE__, filtered_opts, opts)
+  end
 
   @impl true
   def callback_mode(), do: [:handle_event_function, :state_enter]
 
   @impl true
-  def init(_) do
-    # state / data / actions
-    {:ok, %{}, %Data{}, []}
+  def init(opts) do
+    purge_loop = Keyword.get(opts, :purge_loop, @purge_loop)
+    default_ttl = Keyword.get(opts, :ttl, @default_ttl)
+
+    schedule_purge(purge_loop)
+
+    data = %Data{
+      purge_loop: purge_loop,
+      default_ttl: default_ttl
+    }
+
+    {:ok, %{}, data, []}
+  end
+
+  defp schedule_purge(interval) do
+    Process.send_after(self(), :purge, interval)
   end
 
   ### PUBLIC API ###
@@ -136,6 +155,15 @@ defmodule GenCache do
     {:keep_state_and_data, []}
   end
 
+  # handle cleanup timer
+  def handle_event(:info, :purge, _state, data = %Data{}) do
+    Logger.debug("RUNNING PURGE")
+    now = :erlang.monotonic_time()
+    new_data = remove_expired_entries(data, now)
+    schedule_purge(data.purge_loop)
+    {:next_state, new_data.busy, new_data, []}
+  end
+
   defp is_busy_for_request(data, request) do
     Map.get(data.busy, request, false)
   end
@@ -190,6 +218,10 @@ defmodule GenCache do
 
   def remove_expired_entries(data, now) do
     expired_keys = Enum.filter(data.valid_until, fn {_, v} -> v < now end)
+
+    if expired_keys != [] do
+      Logger.debug("Purging #{inspect(expired_keys)}")
+    end
 
     Enum.reduce(expired_keys, data, fn {k, _time}, acc ->
       cleanup_entry(acc, k)

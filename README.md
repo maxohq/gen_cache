@@ -13,11 +13,12 @@ All thanks to the awesome [gen_statem](https://www.erlang.org/doc/apps/stdlib/ge
 
 
 ```elixir
-defmodule MyCache do do
+defmodule MyCache do
   use GenCache
 end
 
-MyCache.start_link()
+# start the cache, that executes state entries purge every 1 second with a default ttl of 15 seconds
+MyCache.start_link(purge_loop: :timer.seconds(1), default_ttl: :timer.seconds(15))
 
 # this will execute the MFA tuple and store the result in the cache
 # you should see "Hello World" printed to the console
@@ -25,6 +26,10 @@ res = MyCache.request({IO, :puts, ["Hello World"]})
 
 # this will not execute the MFA tuple and just return the cached result
 res = MyCache.request({IO, :puts, ["Hello World"]})
+
+
+# add custom ttl for the given key
+res = MyCache.request({IO, :puts, ["Quick one"]}, ttl: :timer.seconds(5))
 ```
 
 ## TODO
