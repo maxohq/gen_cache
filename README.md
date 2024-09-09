@@ -1,6 +1,6 @@
 # GenCache
 
-Generic cache for Elixir. It uses MFA tuples as keys, so you can cache any function call with low development effort.
+Generic cache for Elixir. It uses MFA (module / function / arguments) tuples as keys, so you can cache any function call with low development effort.
 
 By relying on `gen_statem`, it is able to prevent duplicate work on concurrent requests on the same key, while keeping the API simple.
 
