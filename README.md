@@ -30,6 +30,12 @@ res = MyCache.request({IO, :puts, ["Hello World"]})
 
 # add custom ttl for the given key
 res = MyCache.request({IO, :puts, ["Quick one"]}, ttl: :timer.seconds(5))
+
+## log debug messages
+GenCache.Config.log_debug()
+
+## log only info messages
+GenCache.Config.log_info()
 ```
 
 ## TODO
