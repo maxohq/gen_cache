@@ -132,6 +132,27 @@ defmodule GenCacheTest do
     end
   end
 
+  describe "raising response" do
+    test "is not cached" do
+      defmodule RaisingBackend do
+        def fetch(_) do
+          raise "THERE WAS AN ERROR"
+        end
+      end
+
+      {:ok, pid} = GenCache.start_link([])
+
+      assert {:error, %RuntimeError{message: "THERE WAS AN ERROR"}} ==
+               GenCache.request(pid, {RaisingBackend, :fetch, [1]})
+
+      assert "RESULT: 1" = GenCache.request(pid, {ReqBackend, :fetch, [1]})
+
+      assert GenCache.get_state(pid).cache == %{
+               {GenCacheTest.ReqBackend, :fetch, [1]} => "RESULT: 1"
+             }
+    end
+  end
+
   def clean_state(pid) do
     GenCache.get_state(pid) |> Map.put(:valid_until, %{})
   end

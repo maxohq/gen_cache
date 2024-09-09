@@ -94,12 +94,20 @@ defmodule GenCache do
     end
   end
 
-  # fetch data and populate the cache
-  def handle_event(:cast, {:set_response, request, response, from}, _state, data) do
+  # Handle a successful fetch
+  def handle_event(:cast, {:handle_ok_fetch, request, response, from}, _state, data) do
     data = mark_done_for_request(data, request)
     data = store_in_cache(data, request, response)
     data = update_valid_until(data, request)
     actions = [{:reply, from, response}]
+    {:next_state, data.busy, data, actions}
+  end
+
+  # Handle a failed fetch
+  def handle_event(:cast, {:handle_error_fetch, request, error, from}, _state, data) do
+    data = mark_done_for_request(data, request)
+    data = remove_ttl(data, request)
+    actions = [{:reply, from, {:error, error}}]
     {:next_state, data.busy, data, actions}
   end
 
@@ -108,8 +116,21 @@ defmodule GenCache do
 
     # run the fetch in a separate process, to unblock our main loop
     Task.start(fn ->
-      response = apply(mod, fun, args)
-      GenServer.cast(pid, {:set_response, request, response, from})
+      response =
+        try do
+          {:ok, apply(mod, fun, args)}
+        rescue
+          error ->
+            {:error, error}
+        end
+
+      case response do
+        {:ok, result} ->
+          GenServer.cast(pid, {:handle_ok_fetch, request, result, from})
+
+        {:error, error} ->
+          GenServer.cast(pid, {:handle_error_fetch, request, error, from})
+      end
     end)
 
     {:keep_state_and_data, []}
