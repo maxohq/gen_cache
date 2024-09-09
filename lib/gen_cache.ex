@@ -106,7 +106,7 @@ defmodule GenCache do
   # Handle a failed fetch
   def handle_event(:cast, {:handle_error_fetch, request, error, from}, _state, data) do
     data = mark_done_for_request(data, request)
-    data = remove_ttl(data, request)
+    data = cleanup_entry(data, request)
     actions = [{:reply, from, {:error, error}}]
     {:next_state, data.busy, data, actions}
   end
@@ -192,10 +192,14 @@ defmodule GenCache do
     expired_keys = Enum.filter(data.valid_until, fn {_, v} -> v < now end)
 
     Enum.reduce(expired_keys, data, fn {k, _time}, acc ->
-      acc
-      |> remove_from_cache(k)
-      |> remove_valid_until(k)
-      |> remove_ttl(k)
+      cleanup_entry(acc, k)
     end)
+  end
+
+  defp cleanup_entry(data, key) do
+    data
+    |> remove_from_cache(key)
+    |> remove_valid_until(key)
+    |> remove_ttl(key)
   end
 end
