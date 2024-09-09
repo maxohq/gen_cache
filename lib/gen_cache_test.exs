@@ -68,7 +68,9 @@ defmodule GenCacheTest do
                    {GenCacheTest.ReqBackend, :fetch, [1]} => 30000,
                    {GenCacheTest.ReqBackend, :fetch, [2]} => 30000,
                    {GenCacheTest.ReqBackend, :fetch, [3]} => 30000
-                 }
+                 },
+                 default_ttl: 30000,
+                 purge_loop: 5000
                }
     end
   end
@@ -85,7 +87,9 @@ defmodule GenCacheTest do
                ttl: %{
                  {GenCacheTest.ReqBackend, :fetch, [2]} => 30000
                },
-               cache: %{{GenCacheTest.ReqBackend, :fetch, [2]} => "RESULT: 2"}
+               cache: %{{GenCacheTest.ReqBackend, :fetch, [2]} => "RESULT: 2"},
+               default_ttl: 30000,
+               purge_loop: 5000
              }
     end
   end
