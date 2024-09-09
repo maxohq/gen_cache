@@ -30,7 +30,7 @@ res = MyCache.request({IO, :puts, ["Hello World"]})
 ## TODO
 - [ ] configurable default timeout
 - [ ] periodic cleanup of expired entries
-- [ ] protect against raising exceptions in the MFA tuple
+- [x] protect against raising exceptions in the MFA tuple
 
 ## Installation
 
