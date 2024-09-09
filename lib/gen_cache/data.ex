@@ -1,8 +1,8 @@
 defmodule GenCache.Data do
-  defstruct busy: %{},
+  defstruct ttl: %{},
+            busy: %{},
             cache: %{},
             valid_until: %{},
-            ttl: %{},
             purge_loop: 1000,
-            default_ttl: nil
+            default_ttl: 30000
 end

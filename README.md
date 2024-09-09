@@ -38,9 +38,9 @@ GenCache.Config.log_debug()
 GenCache.Config.log_info()
 ```
 
-## TODO
-- [ ] configurable default timeout
-- [ ] periodic cleanup of expired entries
+## Done
+- [x] configurable default timeout
+- [x] periodic cleanup of expired entries
 - [x] protect against raising exceptions in the MFA tuple
 
 ## Installation
