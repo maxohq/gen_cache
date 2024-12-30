@@ -136,6 +136,42 @@ defmodule GenCacheTest do
     end
   end
 
+  describe "reset" do
+    test "resets cache" do
+      {:ok, pid} = GenCache.start_link([])
+      GenCache.request(pid, req_tuple(1))
+      GenCache.request(pid, req_tuple(2))
+      res = clean_state(pid)
+
+      assert res == %GenCache.Data{
+               ttl: %{
+                 {GenCacheTest.ReqBackend, :fetch, [1]} => 30000,
+                 {GenCacheTest.ReqBackend, :fetch, [2]} => 30000
+               },
+               busy: %{},
+               cache: %{
+                 {GenCacheTest.ReqBackend, :fetch, [1]} => "RESULT: 1",
+                 {GenCacheTest.ReqBackend, :fetch, [2]} => "RESULT: 2"
+               },
+               valid_until: %{},
+               purge_loop: 5000,
+               default_ttl: 30000
+             }
+
+      GenCache.reset(pid)
+      res = clean_state(pid)
+
+      assert res == %GenCache.Data{
+               ttl: %{},
+               busy: %{},
+               cache: %{},
+               valid_until: %{},
+               purge_loop: 5000,
+               default_ttl: 30000
+             }
+    end
+  end
+
   describe "raising response" do
     test "is not cached" do
       defmodule RaisingBackend do

@@ -27,6 +27,11 @@ res = MyCache.request({IO, :puts, ["Hello World"]})
 # this will not execute the MFA tuple and just return the cached result
 res = MyCache.request({IO, :puts, ["Hello World"]})
 
+# remove a single entry from cache
+MyCache.remove({IO, :puts, ["Hello World"]})
+
+# Reset the complete cache
+MyCache.reset()
 
 # add custom ttl for the given key
 res = MyCache.request({IO, :puts, ["Quick one"]}, ttl: :timer.seconds(5))
@@ -59,4 +64,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/gen_cache>.
-

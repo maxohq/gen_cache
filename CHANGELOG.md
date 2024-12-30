@@ -1,4 +1,13 @@
+## v0.1.2 (2024-12-30)
+
+### Implements Reset function
+
+- `GenCache.reset(pid)`
+- or macro-based module: `SomeCache.reset()`
+
+
 ## v0.1.1 (2024-09-09)
+
 
 ### Quality of life improvements
 

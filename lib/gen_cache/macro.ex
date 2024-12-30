@@ -58,6 +58,7 @@ defmodule GenCache.Macro do
 
       def remove(request), do: :gen_statem.call(__MODULE__, {:remove, request})
       def get_state(), do: :gen_statem.call(__MODULE__, :get_state)
+      def reset(), do: :gen_statem.call(__MODULE__, :reset)
 
       ### INTERNAL ###
 
