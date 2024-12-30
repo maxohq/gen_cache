@@ -67,6 +67,7 @@ defmodule GenCache do
   def request(pid, request, opts \\ []), do: :gen_statem.call(pid, {:request, request, opts})
   def remove(pid, request), do: :gen_statem.call(pid, {:remove, request})
   def get_state(pid), do: :gen_statem.call(pid, :get_state)
+  def reset(pid), do: :gen_statem.call(pid, :reset)
 
   ### INTERNAL ###
 
@@ -84,6 +85,11 @@ defmodule GenCache do
       |> remove_valid_until(request)
       |> remove_ttl(request)
 
+    {:keep_state, data, [{:reply, from, :ok}]}
+  end
+
+  def handle_event({:call, from}, :reset, _state, data) do
+    data = reset_cache(data)
     {:keep_state, data, [{:reply, from, :ok}]}
   end
 
@@ -182,6 +188,10 @@ defmodule GenCache do
 
   defp remove_from_cache(data, request) do
     %Data{data | cache: Map.delete(data.cache, request)}
+  end
+
+  def reset_cache(data) do
+    %Data{data | cache: %{}, valid_until: %{}, ttl: %{}}
   end
 
   defp get_from_cache(data, request) do

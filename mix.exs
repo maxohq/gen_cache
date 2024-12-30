@@ -2,7 +2,7 @@ defmodule GenCache.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/maxohq/gen_cache"
-  @version "0.1.1"
+  @version "0.1.2"
   @description "gen_statem based generic cache with MFA-based keys"
 
   def project do
