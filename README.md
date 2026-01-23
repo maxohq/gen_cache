@@ -35,11 +35,49 @@ MyCache.reset()
 
 # add custom ttl for the given key
 res = MyCache.request({IO, :puts, ["Quick one"]}, ttl: :timer.seconds(5))
+```
 
-## log debug messages
+## Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `purge_loop` | `5000` (5s) | Interval in ms between cache purge cycles |
+| `ttl` | `30000` (30s) | Default time-to-live for cache entries in ms |
+| `verbose` | `false` | Enable debug logging for purge cycles and expirations |
+
+Example with all options:
+
+```elixir
+MyCache.start_link(
+  purge_loop: :timer.seconds(10),
+  ttl: :timer.minutes(5),
+  verbose: true  # enables debug logs for cache operations
+)
+```
+
+## Logging
+
+### Per-instance logging (verbose option)
+
+Use the `verbose: true` option when starting a cache to enable debug logs for that specific instance:
+
+```elixir
+# Silent (default) - no purge/expiration logs
+MyCache.start_link()
+
+# Verbose - logs purge cycles and expired keys
+MyCache.start_link(verbose: true)
+```
+
+### Global logging (Config module)
+
+Control the Logger level for the entire GenCache module:
+
+```elixir
+# Enable debug messages globally
 GenCache.Config.log_debug()
 
-## log only info messages
+# Only info messages and above
 GenCache.Config.log_info()
 ```
 
@@ -56,7 +94,7 @@ by adding `gen_cache` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:gen_cache, "~> 0.1.0"}
+    {:gen_cache, "~> 0.2.0"}
   ]
 end
 ```

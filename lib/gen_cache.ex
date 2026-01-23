@@ -33,7 +33,7 @@ defmodule GenCache do
 
   @default_ttl :timer.seconds(30)
   @purge_loop :timer.seconds(5)
-  @permitted_opts [:purge_loop, :ttl]
+  @permitted_opts [:purge_loop, :ttl, :verbose]
 
   def start_link(opts \\ []) do
     filtered_opts = Keyword.take(opts, @permitted_opts)
@@ -47,12 +47,14 @@ defmodule GenCache do
   def init(opts) do
     purge_loop = Keyword.get(opts, :purge_loop, @purge_loop)
     default_ttl = Keyword.get(opts, :ttl, @default_ttl)
+    verbose = Keyword.get(opts, :verbose, false)
 
     schedule_purge(purge_loop)
 
     data = %Data{
       purge_loop: purge_loop,
-      default_ttl: default_ttl
+      default_ttl: default_ttl,
+      verbose: verbose
     }
 
     {:ok, %{}, data, []}
@@ -162,8 +164,8 @@ defmodule GenCache do
   end
 
   # handle cleanup timer
-  def handle_event(:info, :purge, _state, data = %Data{}) do
-    Logger.debug("RUNNING PURGE")
+  def handle_event(:info, :purge, _state, data = %Data{verbose: verbose}) do
+    if verbose, do: Logger.debug("RUNNING PURGE")
     now = :erlang.monotonic_time()
     new_data = remove_expired_entries(data, now)
     schedule_purge(data.purge_loop)
@@ -229,7 +231,7 @@ defmodule GenCache do
   def remove_expired_entries(data, now) do
     expired_keys = Enum.filter(data.valid_until, fn {_, v} -> v < now end)
 
-    if expired_keys != [] do
+    if data.verbose && expired_keys != [] do
       Logger.debug("Purging #{inspect(expired_keys)}")
     end
 

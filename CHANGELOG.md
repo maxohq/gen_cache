@@ -1,3 +1,20 @@
+## v0.2.0 (2025-01-23)
+
+### Added verbose option for per-instance logging control
+
+- Added `verbose` option (default: `false`) to control debug logging per cache instance
+- When `verbose: false` (default), purge cycle and expiration logs are suppressed
+- When `verbose: true`, debug logs for "RUNNING PURGE" and expired keys are emitted
+- This allows running caches silently in production while enabling verbose logging for debugging
+
+```elixir
+# Silent (default)
+MyCache.start_link()
+
+# Verbose logging enabled
+MyCache.start_link(verbose: true)
+```
+
 ## v0.1.2 (2024-12-30)
 
 ### Implements Reset function

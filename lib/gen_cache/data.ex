@@ -4,5 +4,6 @@ defmodule GenCache.Data do
             cache: %{},
             valid_until: %{},
             purge_loop: 1000,
-            default_ttl: 30000
+            default_ttl: 30000,
+            verbose: false
 end
